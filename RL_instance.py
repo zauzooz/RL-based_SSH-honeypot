@@ -65,7 +65,7 @@ class ReinforcementAlgorithm:
         if self.alg == "Q-Learning":
             # Cách thức update Q-Learning
             if current_state is not None:
-                reward = self.get_reward(current_state)
+                reward = self.get_reward(current_state, action)
                 if next_state is None:
                     next_state = self.get_next_state(
                         current_state, action, self.epsilon
@@ -88,10 +88,10 @@ class ReinforcementAlgorithm:
         # áp dụng chiến lược greedy-epsilon ở đây
         if np.random.uniform(0, 1) < self.epsilon:
             # chọn một action ngẫu nhiên
-            action = np.random.randint(0, len(self.q_table[self.current_state]))
+            action = int(np.random.randint(0, len(self.q_table[self.current_state])))
         else:
             # chọn action có q_value cao nhất
-            action = np.max(self.q_table[self.current_state])
+            action = int(np.max(self.q_table[self.current_state]))
 
         # lấy reware tương ứng với state và action.
         reward = self.get_reward(self.current_state, action)
@@ -107,9 +107,11 @@ class ReinforcementAlgorithm:
 
         # sau khi thực hiện hàm này xong, hành động này trở thành hành động của quá khư
         # cho nên cần phải gán cho nó là hành động của quá khứ.
-        self.previous_action = action
+        self.previous_action = int(action)
 
-        return action
+        return int(action)
 
     def connection_closed(self):
+        # lưu state tại var/rl để có dịp xài cho lần sau.
+        # lưu unknown_command_dict tại var/explore để cập nhật db sau này.
         pass

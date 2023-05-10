@@ -1,6 +1,10 @@
 import numpy as np
 from RL_instance import ReinforcementAlgorithm
-from database import COMMAND_DATABASE, get_output_in_database
+from RL_log import writelog
+import pickle
+from RL_database import CommandKnowledgeBase
+
+db = CommandKnowledgeBase()
 
 
 class LearningEnvironment:
@@ -10,27 +14,21 @@ class LearningEnvironment:
         self.explore_states = []
         self.unknown_commands = []
 
-    def send_output(output: str):
-        return output
-
     def command_receive(self, command):
-        def is_in_database(command: str):
-            if command in COMMAND_DATABASE.keys():
-                return True
-            else:
-                return False
-
         def produce_next_state(command: str, output: str):
             state = str({"input": command, "output": output})
             return state
 
-        # 2 và 3
-        if is_in_database(command):
+        # 2, 3 kiểm tra command có trong database không.
+        if db.is_command_in_db(command):
             # nếu option LEARNING là True thì thực thi RL
             if self.LEARNING:
                 # 4.2 Có output của command trong db.
-                next_state = produce_next_state(command)
-                self.explore_states.append(next_state)
+                output = db.get_output_by_cmd(command)
+                i = np.random.randint(0, len(output))
+                next_state = produce_next_state(command=command, output=output[i])
+                if next_state not in self.explore_states:
+                    self.explore_states.append(next_state)
 
                 # nếu state mới không nằm trong q_table của thuật toán
                 if next_state not in self.rlalg.q_table:
@@ -41,16 +39,29 @@ class LearningEnvironment:
                 # thuật toán RL sẽ tính toán và trả về index output phù hợp với command.
                 action = self.rlalg.produce_output(next_state)
                 # output trả về sẽ tương ứng với action.
-                output = ""
+                # output = "nnt@nnt:~$ "
+                return output[action]
             # nếu option LEARNING là False thì trả về tĩnh mà không học.
             else:
                 # output sẽ là mặc định trong database.
-                ouput = get_output_in_database(command)
+                output = db.get_output_by_cmd(command)[0]
+                return output
 
         else:
             # 4.1 Không có output của commandd trong db.
             self.unknown_commands.append(command)
-            self.send_output("")
+            return "nnt@nnt:~$ "
 
-    def connection_close():
-        pass
+    def connection_close(self):
+        import datetime
+
+        now = datetime.datetime.now()
+        formatted_date = now.strftime("%d-%m-%Y_%H-%M-%S-%f")
+
+        # lưu state lại để tiện load sau này.
+
+        # lưu danh sách unknown_commands dùng trong việc update sau này.
+        pickle.dump(
+            self.unknown_commands,
+            open(f"var/explore/unknown_commands_{formatted_date}", "wb"),
+        )
