@@ -1,6 +1,6 @@
-from environment import LearningEnvironment
-from RL_instance import ReinforcementAlgorithm
-from RL_log import writelog
+from learner.environment import LearningEnvironment
+from learner.RL_instance import ReinforcementAlgorithm
+from learner.RL_log import writelog
 
 
 def Login():

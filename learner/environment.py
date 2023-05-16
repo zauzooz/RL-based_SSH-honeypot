@@ -1,8 +1,8 @@
 import numpy as np
-from RL_instance import ReinforcementAlgorithm
-from RL_log import writelog
+from learner.RL_instance import ReinforcementAlgorithm
+from learner.RL_log import writelog
 import pickle
-from RL_database import CommandKnowledgeBase
+from learner.RL_database import CommandKnowledgeBase
 
 db = CommandKnowledgeBase()
 
@@ -63,5 +63,5 @@ class LearningEnvironment:
         # lưu danh sách unknown_commands dùng trong việc update sau này.
         pickle.dump(
             self.unknown_commands,
-            open(f"var/explore/unknown_commands_{formatted_date}", "wb"),
+            open(f"learner/var/explore/unknown_commands_{formatted_date}.log", "wb"),
         )
