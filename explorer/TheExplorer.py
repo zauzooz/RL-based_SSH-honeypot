@@ -9,7 +9,7 @@ import pickle
 
 class Explorer:
     def __init__(self, file_names: dict):
-        self.process_file_names = file_names
+        self.files_path_list = file_names
 
     def docker_rm(self, container):
         container.remove()
@@ -17,26 +17,32 @@ class Explorer:
     def docker_stop(self, container):
         container.stop()
 
-    def process_file(self, file_path):
+    def process_file(self, file_path) -> dict:
 
         unknown_command_list = pickle.load(open(file_path, "rb"))
         
         def standardize_commands(unknown_command_list: list):
-            pass
+            return unknown_command_list
 
         unknown_command_list = standardize_commands(unknown_command_list)
 
         return unknown_command_list
     
     def save_outputs(self, command_dict: dict):
+
+        import datetime
+
+        now = datetime.datetime.now()
+        formatted_date = now.strftime("%d-%m-%Y_%H-%M-%S-%f")
+
         pickle.dump(
             command_dict,
-            open("explorer/var/output.plk", "wb")
+            open(f"explorer/var/output_.{formatted_date}plk", "wb")
         )
 
     def start(self):
         client = docker.from_env()
-        for file in self.process_file_names:
+        for file in self.files_path_list:
             container = client.containers.run('myubuntu', tty=True, stdin_open=True, detach=True)
             command_list = self.process_file(file)
             command_dict = {}
