@@ -1,49 +1,56 @@
-import configparser
-from pyVim import connect
-from pyVmomi import vim
+#/usr/bin/python3
+import docker
+import pickle
 
+"""
+    return outputs each of command from a list of file
+    return list of file proccessed
+"""
 
 class Explorer:
-    def __init__(self) -> None:
-        # danh sách đường dẫn đến file unknown command xử cần xử lý
-        self.paths = []
-        # danh sách các host backend.
-        self.config = configparser.ConfigParser()
-        self.config.read("explorer/vmlist.cfg")
-        self.hosts_info = {}
-        for vm in self.config.sections():
-            self.hosts_info[vm] = {}
-            self.hosts_info[vm]["host"] = self.config[vm].get("host")
-            self.hosts_info[vm]["username"] = self.config[vm].get("username")
-            self.hosts_info[vm]["password"] = self.config[vm].get("password")
-        pass
+    def __init__(self, file_names: dict):
+        self.process_file_names = file_names
 
-    def shutdown_process(self):
-        pass
+    def docker_rm(self, container):
+        container.remove()
 
-    def vm_complete(self):
-        pass
+    def docker_stop(self, container):
+        container.stop()
 
-    def process_file(self):
-        pass
+    def process_file(self, file_path):
 
-    def test(self):
-        for vm in self.hosts_info:
-            try:
-                host_ip = self.hosts_info[vm]["host"]
-                username = self.hosts_info[vm]["username"]
-                password = self.hosts_info[vm]["password"]
-                si = connect.SmartConnection(
-                    host=host_ip,
-                    user=username,
-                    pwd=password,
-                )
-                print("Connection successful.")
-                connect.Disconnect(si=si)
-            except Exception as e:
-                print(f"Connection failed: {e}")
+        unknown_command_list = pickle.load(open(file_path, "rb"))
+        
+        def standardize_commands(unknown_command_list: list):
+            pass
 
+        unknown_command_list = standardize_commands(unknown_command_list)
 
-if __name__ == "__main__":
-    explorer = Explorer()
-    explorer.test()
+        return unknown_command_list
+    
+    def save_outputs(self, command_dict: dict):
+        pickle.dump(
+            command_dict,
+            open("explorer/var/output.plk", "wb")
+        )
+
+    def start(self):
+        client = docker.from_env()
+        for file in self.process_file_names:
+            container = client.containers.run('myubuntu', tty=True, stdin_open=True, detach=True)
+            command_list = self.process_file(file)
+            command_dict = {}
+            
+            for cmd in command_list:
+                output = container.exec_run(cmd)
+                command_dict[cmd] = output.output.decode('utf-8')
+            
+            # stop container
+            self.docker_stop(container)
+
+            # remove container
+            self.docker_rm(container)
+
+            # save output to file
+            self.save_outputs(command_dict)
+

@@ -61,7 +61,8 @@ class LearningEnvironment:
         # lưu state lại để tiện load sau này.
 
         # lưu danh sách unknown_commands dùng trong việc update sau này.
-        pickle.dump(
-            self.unknown_commands,
-            open(f"learner/var/explore/unknown_commands_{formatted_date}.log", "wb"),
-        )
+        if self.unknown_commands != []:
+            pickle.dump(
+                self.unknown_commands,
+                open(f"learner/var/explorer/unknown_commands_{formatted_date}.log", "wb"),
+            )
