@@ -37,7 +37,7 @@ class Explorer:
 
         pickle.dump(
             command_dict,
-            open(f"explorer/var/output_.{formatted_date}plk", "wb")
+            open(f"explorer/var/output_{formatted_date}.plk", "wb")
         )
 
     def start(self):

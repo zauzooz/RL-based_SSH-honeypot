@@ -41,7 +41,7 @@ class CommandKnowledgeBase:
         rows = self.cursor.fetchall()
         if len(rows) > 0:
             return [row[0] for row in rows]
-        return ["nnt@nnt:~$"]
+        return [""]
 
     def close(self):
         self.cursor.close()

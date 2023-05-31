@@ -50,7 +50,7 @@ class LearningEnvironment:
         else:
             # 4.1 Không có output của commandd trong db.
             self.unknown_commands.append(command)
-            return "nnt@nnt:~$ "
+            return ""
 
     def connection_close(self):
         import datetime

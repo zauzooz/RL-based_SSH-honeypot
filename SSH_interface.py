@@ -18,12 +18,12 @@ def TerminalEmulator():
     env = LearningEnvironment(rlalg=alg, learning=True)
 
     # đợi nhận input đầu tiên khi đăng nhập thành công.
-    cmd = input("nnt@nnt:~$ ")
+    cmd = input("$ ")
     while cmd != "exit":
         output = env.command_receive(cmd)
         print(output, end="")
         cmd = ""
-        cmd = input()
+        cmd = input("$ ")
     env.connection_close()
 
 
