@@ -11,12 +11,13 @@ class LearningEnvironment:
     def __init__(self, rlalg: ReinforcementAlgorithm, learning: bool = True) -> None:
         self.rlalg = rlalg  # agent
         self.LEARNING = learning
+        self.previous_output = ""
         self.explore_states = []
         self.unknown_commands = []
 
     def command_receive(self, command):
         def produce_next_state(command: str, output: str):
-            state = str({"current_input": command, "previous_output": self.rlalg.previous_state})
+            state = str({"current_input": command, "previous_output": self.previous_output})
             return state
 
         # 2, 3 kiểm tra command có trong database không.
@@ -44,8 +45,10 @@ class LearningEnvironment:
 
                 # thuật toán RL sẽ tính toán và trả về index output phù hợp với command.
                 action = self.rlalg.produce_output(next_state)
+                write_log(f"[environment] The output will be {output[action]}.")
                 # output trả về sẽ tương ứng với action.
                 # output = "nnt@nnt:~$ "
+                self.previous_output = output[action]
                 return output[action]
             # nếu option LEARNING là False thì trả về tĩnh mà không học.
             else:

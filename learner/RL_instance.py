@@ -1,7 +1,7 @@
 import numpy as np
 import random
 import pickle
-from RL_log import write_log
+from learner.RL_log import write_log
 
 
 class ReinforcementAlgorithm:
@@ -80,8 +80,10 @@ class ReinforcementAlgorithm:
                 new_q = current_q + self.learning_rate * (
                     reward + self.discount * max_future_q - current_q
                 )
+                write_log(f"[reinforcement learning, update, q-learning] Q-value of {self.current_state} with action {action} is {new_q}.")
                 self.q_table[current_state][action] = new_q
 
+                write_log(f"[reinforcement learning, update, q-learning] Update current state {self.current_state} to {next_state}.")
                 self.current_state = next_state
 
                 self.q_table_update.append({
@@ -107,13 +109,11 @@ class ReinforcementAlgorithm:
         if e < self.epsilon:
             # chọn một action ngẫu nhiên
             action = int(np.random.randint(0, len(self.q_table[self.current_state])))
-            write_log(f"[reinforcement learning, produce_output] Since {e} is smaller than {self.epsilon}, \
-                      the action will be taken randomly. The selected action is action {action}.")
+            write_log(f"[reinforcement learning, produce_output] Since {e} is smaller than {self.epsilon}, the action will be taken randomly. The selected action is action {action}.")
         else:
             # chọn action có q_value cao nhất
             action = int(np.max(self.q_table[self.current_state]))
-            write_log(f"[reinforcement learning, produce_output] Becase {e} is larger than {self.epsilon}, \
-                      the action having maximum q-value will be taken. The selected action is action {action}.")
+            write_log(f"[reinforcement learning, produce_output] Becase {e} is larger than {self.epsilon}, the action having maximum q-value will be taken. The selected action is action {action}.")
 
         # lấy reware tương ứng với state và action.
         reward = self.get_reward(self.current_state, action)
