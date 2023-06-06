@@ -1,12 +1,14 @@
 from learner.environment import LearningEnvironment
 from learner.RL_instance import ReinforcementAlgorithm
-from learner.RL_log import writelog
+from learner.RL_log import write_log
 
+DATE_TIME = ""
 
 def Login():
     username = input("Username: ")
     password = input("Password: ")
     if (username == "nnt") and (password == "dtd"):
+        write_log("[terminal] Login successfull.")
         return True
 
 
@@ -20,6 +22,7 @@ def TerminalEmulator():
     # đợi nhận input đầu tiên khi đăng nhập thành công.
     cmd = input("$ ")
     while cmd != "exit":
+        write_log(f"[terminal] recieved command {cmd}.")
         output = env.command_receive(cmd)
         print(output, end="")
         cmd = ""
@@ -28,6 +31,7 @@ def TerminalEmulator():
 
 
 if __name__ == "__main__":
+    write_log("[terminal] Start stupidPot.")
     i = 0
     while i < 3:
         if Login():
@@ -35,4 +39,8 @@ if __name__ == "__main__":
             break
         else:
             print("Wrong Username or Password.")
+            write_log("[terminal] Loggin fails.")
             i += 1
+    else:
+        write_log("[terminal] Login attemps failed.")
+    write_log("[terminal] End session.")

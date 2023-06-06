@@ -46,16 +46,3 @@ class CommandKnowledgeBase:
     def close(self):
         self.cursor.close()
         self.conn.close()
-
-
-# COMMAND_DATABASE = {}
-
-# if __name__ == "__main__":
-#     db = CommandKnowledgeBase()
-#     cmd = "ls"
-#     output = """LICENSE  README  README.md  lib  peda.py  python23-compatibility.md\nnnt@nnt:~/peda$"""
-#     db.add_new(command=cmd, output=output)
-#     cmd = "nnt@nnt:~$ cd peda/"
-#     output = "nnt@nnt:~/peda$"
-#     db.add_new(command=cmd, output=output)
-#     db.close()

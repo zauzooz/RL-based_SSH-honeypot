@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import pickle
+from RL_log import write_log
 
 
 class ReinforcementAlgorithm:
@@ -53,19 +54,22 @@ class ReinforcementAlgorithm:
         Trả về +1 nếu nhận command khác 'exit', trả về -1 nếu nhận command là 'exit'.
         """
         if "exit" in current_state:
+            write_log(f"[reinforcement learning, get_reward] Because the \"exit\" command is recieved, the REWARD will be -1.")
             return -1
         else:
+            write_log(f"[reinforcement learning, get_reward] Because the \"exit\" command  is not recieved, the REWARD will be 1.")
             return 1
 
-    def update(self, current_state, action, next_state):
+    def update(self, current_state, action, next_state, reward):
         """
 
         next_state: được tạo ra bởi produce_next_state ở Environment
         """
         if self.alg == "Q-Learning":
             # Cách thức update Q-Learning
+            write_log(f"[reinforcement learning, update, q-learning] Q-Learning is selected.")
             if current_state is not None:
-                reward = self.get_reward(current_state, action)
+                # reward = self.get_reward(current_state, action)
                 if next_state is None:
                     next_state = self.get_next_state(
                         current_state, action, self.epsilon
@@ -80,18 +84,36 @@ class ReinforcementAlgorithm:
 
                 self.current_state = next_state
 
+                self.q_table_update.append({
+                    "current_state": current_state,
+                    "next_state": next_state,
+                    "action": action,
+                    "reward": reward
+                })
+            else:
+                write_log(f"[reinforcement learning, get_reward] The CURRENT STATE is None.")
+                
+        elif self.alg == "Deep-Q-Learning":
+            pass
+
     def produce_output(self, state):
         # cập nhật lại bước hiện tại
         self.previous_state = self.current_state
         self.current_state = state
+        write_log(f"[reinforcement learning, produce_output] PREVIOUS STATE is {self.previous_state}, while CURRENT STATE is {self.current_state}.")
 
         # áp dụng chiến lược greedy-epsilon ở đây
-        if np.random.uniform(0, 1) < self.epsilon:
+        e = np.random.uniform(0, 1)
+        if e < self.epsilon:
             # chọn một action ngẫu nhiên
             action = int(np.random.randint(0, len(self.q_table[self.current_state])))
+            write_log(f"[reinforcement learning, produce_output] Since {e} is smaller than {self.epsilon}, \
+                      the action will be taken randomly. The selected action is action {action}.")
         else:
             # chọn action có q_value cao nhất
             action = int(np.max(self.q_table[self.current_state]))
+            write_log(f"[reinforcement learning, produce_output] Becase {e} is larger than {self.epsilon}, \
+                      the action having maximum q-value will be taken. The selected action is action {action}.")
 
         # lấy reware tương ứng với state và action.
         reward = self.get_reward(self.current_state, action)
@@ -100,7 +122,7 @@ class ReinforcementAlgorithm:
         self.learning_point += reward
 
         # Thực hiện cập nhật giá trị q_value trong q_table
-        self.update(self.previous_state, action, self.current_state)
+        self.update(self.previous_state, action, self.current_state, reward)
 
         # tăng điểm số lệnh nhận được
         self.step += 1

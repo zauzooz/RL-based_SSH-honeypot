@@ -1,6 +1,6 @@
 import numpy as np
 from learner.RL_instance import ReinforcementAlgorithm
-from learner.RL_log import writelog
+from learner.RL_log import write_log
 import pickle
 from learner.RL_database import CommandKnowledgeBase
 
@@ -16,17 +16,23 @@ class LearningEnvironment:
 
     def command_receive(self, command):
         def produce_next_state(command: str, output: str):
-            state = str({"input": command, "output": output})
+            state = str({"current_input": command, "previous_output": self.rlalg.previous_state})
             return state
 
         # 2, 3 kiểm tra command có trong database không.
         if db.is_command_in_db(command):
+            write_log(f"[environment] {command} is in the database.")
+            self.unknown_commands.append(command)
+            
             # nếu option LEARNING là True thì thực thi RL
             if self.LEARNING:
+                write_log(f"[environment] LEARNING is True")
                 # 4.2 Có output của command trong db.
                 output = db.get_output_by_cmd(command)
+                write_log(f"[environment] Get list of output from the database. There are {len(output)} output.")
                 i = np.random.randint(0, len(output))
                 next_state = produce_next_state(command=command, output=output[i])
+                write_log(f"[environment] Choosen action is {i}. Therefore next_state will be {next_state}.")
                 if next_state not in self.explore_states:
                     self.explore_states.append(next_state)
 
@@ -48,6 +54,7 @@ class LearningEnvironment:
                 return output
 
         else:
+            write_log(f"[environment] {command} is not in the database.")
             # 4.1 Không có output của commandd trong db.
             self.unknown_commands.append(command)
             return ""

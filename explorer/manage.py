@@ -21,12 +21,15 @@ def update_database(files_out_path_list: list):
         values = cmd_out.values()
         keys_values = list(zip(keys, values))
         for (cmd, out) in keys_values:
-            id = sha256((cmd + out).encode()).hexdigest()
-            insert_query = f"INSERT INTO {TABLE_NAME} (id, command, output ) VALUES (?, ?, ?)"
-            data = (id, cmd, out)
-            cursor.execute(insert_query, data)
-            conn.commit()
-    
+            try:
+                id = sha256((cmd + out).encode()).hexdigest()
+                insert_query = f"INSERT INTO {TABLE_NAME} (id, command, output ) VALUES (?, ?, ?)"
+                data = (id, cmd, out)
+                cursor.execute(insert_query, data)
+                conn.commit()
+            except:
+                pass
+        
     cursor.close()
     conn.close()
 

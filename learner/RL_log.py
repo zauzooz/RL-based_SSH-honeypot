@@ -1,16 +1,10 @@
 import datetime
 import os
+import logging
 
-
-def writelog(msg: str):
-    today = datetime.datetime.today()
-    day_month_year = f"{today.day}-{today.month}-{today.year}"
-    filename = f"log/{day_month_year}.txt"
-    if os.path.isfile(filename) == False:
-        with open(f"{filename}", "w") as f:
-            pass
-    f = open(filename, "a")
-    now = datetime.datetime.now()
-    formatted_date = now.strftime("%d-%m-%Y_%H-%M-%S-%f")
-    f.write(f"[{formatted_date}] {msg}\n")
-    f.close()
+def write_log(msg:str):
+    path = "learner/log/"
+    logging.basicConfig(filename='learner/log/log.log', 
+                        level=logging.INFO,
+                        format='[%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S:]')
+    logging.info(msg=msg)
