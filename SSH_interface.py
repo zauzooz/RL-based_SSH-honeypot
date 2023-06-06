@@ -1,3 +1,5 @@
+import os
+import json
 from learner.environment import LearningEnvironment
 from learner.RL_instance import ReinforcementAlgorithm
 from learner.RL_log import write_log
@@ -11,10 +13,25 @@ def Login():
         write_log("[terminal] Login successfull.")
         return True
 
+def get_q_table(dir_path: str):
+    file_names = []
+
+    # Iterate over all the files and folders within the given directory
+    for root, dirs, files in os.walk(dir_path):
+        # Append the file names to the list
+        for file in files:
+            file_names.append(os.path.join(root, file))
+    if file_names:
+        last_file_path = file_names[-1]
+        dir_path = os.path.dirname(last_file_path)
+        file_name = os.path.basename(last_file_path)
+        return json.load(open(os.path.join(dir_path, file_name), "r"))
+    else:
+        return {}
 
 def TerminalEmulator():
     # khởi tạo thuật toán RL
-    alg = ReinforcementAlgorithm()
+    alg = ReinforcementAlgorithm(q_table=get_q_table("learner/var/rl/q-table/"))
 
     # khởi tạo môi trường RL
     env = LearningEnvironment(rlalg=alg, learning=True)

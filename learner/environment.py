@@ -16,8 +16,8 @@ class LearningEnvironment:
         self.unknown_commands = []
 
     def command_receive(self, command):
-        def produce_next_state(command: str, output: str):
-            state = str({"current_input": command, "previous_output": self.previous_output})
+        def produce_next_state(command: str):
+            state = str({"previous_output": self.previous_output, "current_input": command})
             return state
 
         # 2, 3 kiểm tra command có trong database không.
@@ -31,9 +31,8 @@ class LearningEnvironment:
                 # 4.2 Có output của command trong db.
                 output = db.get_output_by_cmd(command)
                 write_log(f"[environment] Get list of output from the database. There are {len(output)} output.")
-                i = np.random.randint(0, len(output))
-                next_state = produce_next_state(command=command, output=output[i])
-                write_log(f"[environment] Choosen action is {i}. Therefore next_state will be {next_state}.")
+                next_state = produce_next_state(command=command)
+                write_log(f"[environment] The next_state will be {next_state}.")
                 if next_state not in self.explore_states:
                     self.explore_states.append(next_state)
 
@@ -41,7 +40,7 @@ class LearningEnvironment:
                 if next_state not in self.rlalg.q_table:
                     # hiện tại đang thực hiện trong trường hợp có 1 output,
                     # với trưởng hợp có nhiều output cần lấy toàn bột danh sách output có thể có của command.
-                    self.rlalg.q_table[next_state] = np.zeros(1).tolist()
+                    self.rlalg.q_table[next_state] = np.zeros(len(output)).tolist()
 
                 # thuật toán RL sẽ tính toán và trả về index output phù hợp với command.
                 action = self.rlalg.produce_output(next_state)
@@ -64,6 +63,7 @@ class LearningEnvironment:
 
     def connection_close(self):
         import datetime
+        import json
 
         now = datetime.datetime.now()
         formatted_date = now.strftime("%d-%m-%Y_%H-%M-%S-%f")
@@ -76,3 +76,15 @@ class LearningEnvironment:
                 self.unknown_commands,
                 open(f"learner/var/explorer/unknown_commands_{formatted_date}.log", "wb"),
             )
+        # save q-table for future use.
+        json.dump(
+            self.rlalg.q_table,
+            open(f"learner/var/rl/q-table/q-table_{formatted_date}.json", "w"),
+            indent=6
+        )
+        # save explore state to expand state space.
+        json.dump(
+            self.explore_states,
+            open(f"learner/var/rl/explore_states/explore_state_{formatted_date}","w"),
+            indent=6
+        )
