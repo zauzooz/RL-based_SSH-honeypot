@@ -41,6 +41,9 @@ class LearningEnvironment:
                     # hiện tại đang thực hiện trong trường hợp có 1 output,
                     # với trưởng hợp có nhiều output cần lấy toàn bột danh sách output có thể có của command.
                     self.rlalg.q_table[next_state] = np.zeros(len(output)).tolist()
+                if (len(self.rlalg.q_table[next_state])) < len(output):
+                    while len(self.rlalg.q_table[next_state]) < len(output):
+                        self.rlalg.q_table[next_state].append(0.0)
 
                 # thuật toán RL sẽ tính toán và trả về index output phù hợp với command.
                 action = self.rlalg.produce_output(next_state)
@@ -59,7 +62,7 @@ class LearningEnvironment:
             write_log(f"[environment] {command} is not in the database.")
             # 4.1 Không có output của commandd trong db.
             self.unknown_commands.append(command)
-            return ""
+            return "Command not found.\n"
 
     def connection_close(self):
         import datetime

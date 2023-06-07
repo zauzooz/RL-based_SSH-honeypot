@@ -1,0 +1,11 @@
+**/__pycache__
+database/db.py
+learner/var/trash/*
+explorer/trash/*
+database/db.py
+learner/log
+database/knowlege_base_command.db
+learner/var/rl/q-table
+learner/var/rl/explore_states
+stupidPot.cfg
+ternimal/keys/*
