@@ -13,3 +13,6 @@ database/knowlege_base_command.db
 stupidPot.cfg
 ternimal/keys/*
 trainBot/trainset/*
+trainBot/log/*
+trainBot/trash/*
+trainBot/accuracy_log/*

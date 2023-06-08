@@ -84,4 +84,4 @@ def trainset_generator(n_samples: int):
         container.remove()
 
 if __name__ == "__main__":
-    trainset_generator(20)
+    trainset_generator(19)
