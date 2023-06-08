@@ -7,7 +7,7 @@ from learner.RL_log import write_log
 
 
 def start_server():
-    def get_q_table(dir_path: str):
+    def load_json(dir_path: str):
         file_names = []
 
         # Iterate over all the files and folders within the given directory
@@ -22,6 +22,8 @@ def start_server():
             return json.load(open(os.path.join(dir_path, file_name), "r"))
         else:
             return {}
+    
+    write_log("[terminal] Start stupidPot.")
 
     # Create a socket object
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,10 +44,17 @@ def start_server():
             print("Accepted connection from {}:{}".format(*client_address))
 
             # Initialize RL algorithm
-            alg = ReinforcementAlgorithm(q_table=get_q_table("learner/var/rl/q-table/"))
+            alg = ReinforcementAlgorithm(
+                alg='Q-Learning',
+                q_table=load_json("learner/var/rl/q-table/")
+            )
 
             # Initialize RL environment
-            env = LearningEnvironment(rlalg=alg, learning=True)
+            env = LearningEnvironment(
+                rlalg=alg, 
+                learning=True,
+                explore_states=load_json("learner/var/rl/explore_states/")
+            )
 
             try:
                 while True:
@@ -54,7 +63,9 @@ def start_server():
 
                     # Check if exit command received
                     if command == "exit":
+                        output = env.command_receive(command)
                         env.connection_close()
+                        write_log("[terminal] End session.")
                         break
 
                     # Process the command
@@ -76,6 +87,7 @@ def start_server():
     except KeyboardInterrupt:
         print("Server interrupted. Closing the server socket.")
         server_socket.close()
+        write_log("[terminal] End session.")
 
 
 if __name__ == '__main__':

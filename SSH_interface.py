@@ -13,7 +13,7 @@ def Login():
         write_log("[terminal] Login successfull.")
         return True
 
-def get_q_table(dir_path: str):
+def load_json(dir_path: str):
     file_names = []
 
     # Iterate over all the files and folders within the given directory
@@ -31,10 +31,17 @@ def get_q_table(dir_path: str):
 
 def TerminalEmulator():
     # khởi tạo thuật toán RL
-    alg = ReinforcementAlgorithm(q_table=get_q_table("learner/var/rl/q-table/"))
+    alg = ReinforcementAlgorithm(
+        alg='Q-Learning',
+        q_table=load_json("learner/var/rl/q-table/")
+    )
 
     # khởi tạo môi trường RL
-    env = LearningEnvironment(rlalg=alg, learning=True)
+    env = LearningEnvironment(
+        rlalg=alg, 
+        learning=True,
+        explore_states=load_json("learner/var/rl/explore_states")
+        )
 
     # đợi nhận input đầu tiên khi đăng nhập thành công.
     cmd = input("$ ")
@@ -44,6 +51,7 @@ def TerminalEmulator():
         print(output, end="")
         cmd = ""
         cmd = input("$ ")
+    output = env.command_receive(cmd) # exit command
     env.connection_close()
 
 

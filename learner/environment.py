@@ -8,11 +8,11 @@ db = CommandKnowledgeBase()
 
 
 class LearningEnvironment:
-    def __init__(self, rlalg: ReinforcementAlgorithm, learning: bool = True) -> None:
+    def __init__(self, rlalg: ReinforcementAlgorithm, learning: bool = True, explore_states = []) -> None:
         self.rlalg = rlalg  # agent
         self.LEARNING = learning
-        self.previous_output = ""
-        self.explore_states = []
+        self.previous_output = None
+        self.explore_states = [] if type(explore_states)is dict else explore_states
         self.unknown_commands = []
 
     def command_receive(self, command):
@@ -41,7 +41,7 @@ class LearningEnvironment:
                     # hiện tại đang thực hiện trong trường hợp có 1 output,
                     # với trưởng hợp có nhiều output cần lấy toàn bột danh sách output có thể có của command.
                     self.rlalg.q_table[next_state] = np.zeros(len(output)).tolist()
-                if (len(self.rlalg.q_table[next_state])) < len(output):
+                if len(self.rlalg.q_table[next_state]) < len(output):
                     while len(self.rlalg.q_table[next_state]) < len(output):
                         self.rlalg.q_table[next_state].append(0.0)
 
@@ -88,6 +88,6 @@ class LearningEnvironment:
         # save explore state to expand state space.
         json.dump(
             self.explore_states,
-            open(f"learner/var/rl/explore_states/explore_state_{formatted_date}","w"),
+            open(f"learner/var/rl/explore_states/explore_state_{formatted_date}.json","w"),
             indent=6
         )

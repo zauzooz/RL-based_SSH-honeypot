@@ -24,25 +24,12 @@ class ReinforcementAlgorithm:
         self.epsilon: float = epsilon
         self.q_table: dict = q_table  # q_table là một dictionary với cặp key-value là state-aciton (action là một danh sách các giá trị q_value)
 
-        self.exploration: bool = explorarion
-
-        self.transition_table = None
-        self.command_dict: dict = command_dict
-        self.unknown_command_list = []
-
         self.previous_state: str = None
         self.previous_action: int = None
         self.current_state: str = None
-        self.q_table_update: list = []
 
         self.step: int = 0  # tăng thêm 1 mỗi lần nhận một input khác 'exit'.
         self.learning_point: float = 0  # số điểm tích lũy trong suốt quá trình học.
-
-    def is_new_state(self, state):
-        if state not in self.q_table:
-            return True
-        else:
-            return False
 
     def get_next_state(self, current_state, action, epsilon):
         state_list = list(self.q_table.keys())
@@ -75,23 +62,17 @@ class ReinforcementAlgorithm:
                         current_state, action, self.epsilon
                     )
                 max_future_q = np.max(self.q_table[next_state])
-                current_q = self.q_table[current_state][action]
+                current_q = self.q_table[current_state][self.previous_action]
 
                 new_q = current_q + self.learning_rate * (
                     reward + self.discount * max_future_q - current_q
                 )
                 write_log(f"[reinforcement learning, update, q-learning] Q-value of {self.current_state} with action {action} is {new_q}.")
-                self.q_table[current_state][action] = new_q
+                self.q_table[current_state][self.previous_action] = new_q
 
                 write_log(f"[reinforcement learning, update, q-learning] Update current state {self.current_state} to {next_state}.")
                 self.current_state = next_state
 
-                self.q_table_update.append({
-                    "current_state": current_state,
-                    "next_state": next_state,
-                    "action": action,
-                    "reward": reward
-                })
             else:
                 write_log(f"[reinforcement learning, get_reward] The CURRENT STATE is None.")
                 
