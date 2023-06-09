@@ -95,7 +95,7 @@ def start_server():
         client_socket.connect(server_address)
         write_log(formatted_datetime,f"Access to localhost at {PORT}.")
 
-        write_log(formatted_datetime,f"Train set {ith}, path: {paths_list}")
+        write_log(formatted_datetime,f"Train set {ith}, path: {path}")
         cmd_seq = json.load(
             open(path, "r")
         )
@@ -127,7 +127,7 @@ def start_server():
                 output_pred = send_command_recieve_output(client_socket, command)
                 client_socket.close()
                 FULL_COMMAND = False
-                write_log(formatted_datetime,f"Because threshold is smaller than THRESHOLD ({threshold} < {THRESHOLD}), , trainBot continues to send {command} command.")
+                write_log(formatted_datetime,f"Because threshold is smaller than THRESHOLD ({threshold} < {THRESHOLD}), trainBot continues to send {command} command.")
                 break
         
         if FULL_COMMAND is True:
@@ -148,6 +148,6 @@ def start_server():
 
 if __name__ == '__main__':
     # Read input for the first command
-    N = 10
+    N = 1
     for i in range(N):
         start_server()
