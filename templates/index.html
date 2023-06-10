@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SQLite Data Viewer</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <form method="post" action="/">
+        <input type="text" name="command" placeholder="Enter command to filter">
+        <input type="submit" value="Filter">
+    </form>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Command</th>
+                <th>Output</th>
+                <!-- Add more columns here -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['command'] }}</td>
+                <td>{{ row['output'] }}</td>
+                <!-- Add more columns here -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
