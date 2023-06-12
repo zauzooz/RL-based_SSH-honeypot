@@ -59,6 +59,7 @@ def update_database(files_out_path_list: list):
         keys_values = list(zip(keys, values))
         for (cmd, out) in keys_values:
             try:
+                write_log(formatted_datetime, f"[update database] Command: {cmd}")
                 # check command is in database.
                 check_query = f"SELECT * FROM {TABLE_NAME} WHERE command = '{cmd}'"
                 write_log(formatted_datetime, f"[update database] Checking Query: {check_query}")
@@ -67,21 +68,26 @@ def update_database(files_out_path_list: list):
 
                 n_results = len(results)
                 if n_results > 0:
+                    write_log(formatted_datetime, f"[update database] The n_results is {n_results} and larger than 0.")
                     row = results[0]
                     write_log(formatted_datetime, f"[update database] Query result: {row}")
-                    e = percent_match(row, out)
+                    e = percent_match(row[2], out)
                     if e > 0.7:
-                        write_log(formatted_datetime, f"[update database] Because percentant match is larger than 0.7, don't update this command into database.")
+                        write_log(formatted_datetime, f"[update database] Because percentant match is larger than 0.7, don't update command '{cmd}' and its output into database.")
                         continue
                     else:
-                        write_log(formatted_datetime, f"[update database] Because percentant match is smaller than 0.7, update this command into database.")
-                
+                        write_log(formatted_datetime, f"[update database] Because percentant match is smaller than 0.7, update command '{cmd}' and its output into database.")
+                else:
+                    write_log(formatted_datetime, f"[update database] n_results is {n_results} and smaller than 0. Update a new command - output.")
+
                 id = sha256((cmd + out).encode()).hexdigest()
                 insert_query = f"INSERT INTO {TABLE_NAME} (id, command, output ) VALUES (?, ?, ?)"
                 data = (id, cmd, out)
                 cursor.execute(insert_query, data)
                 conn.commit()
-            except e:
+                write_log(formatted_datetime, f"[update database] Update command {cmd} and output {out} into database.")
+
+            except Exception as e:
                 write_log(formatted_datetime, f"[update database] Error: {e}.")
         
     cursor.close()
