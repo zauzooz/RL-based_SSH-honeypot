@@ -11,5 +11,5 @@ sudo python3 trainBot/trainset_gen.py
 To train the RL stupidPot, first run `SSH_server.py`. Then run:
 
 ```
-python3 trainBot.py
+python3 trainBot/trainBot.py
 ```

@@ -1,6 +1,7 @@
 **/__pycache__
 database/db.py
 explorer/trash/*
+explorer/log/*
 learner/var/explorer/*
 learner/var/rl/explore_states/*
 learner/var/rl/q-table/*

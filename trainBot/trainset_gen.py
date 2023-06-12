@@ -48,6 +48,8 @@ def trainset_generator(n_samples: int):
 
         command_list = command_list_generator()
 
+        # command_list = COMMANDS.copy()
+
         print(command_list)
         
         data = {}
