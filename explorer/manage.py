@@ -47,6 +47,14 @@ def percent_match(str1: str, str2: str) -> float:
 
 def update_database(files_out_path_list: list):
 
+    def update(conn, cursor, TABLE_NAME: str, cmd: str, out: str):
+        id = sha256((cmd + out).encode()).hexdigest()
+        insert_query = f"INSERT INTO {TABLE_NAME} (id, command, output ) VALUES (?, ?, ?)"
+        data = (id, cmd, out)
+        cursor.execute(insert_query, data)
+        conn.commit()
+        write_log(formatted_datetime, f"[update database] Update command {cmd} and output {out} into database.")
+
     conn = sqlite3.connect("database/knowlege_base_command.db")
     cursor = conn.cursor()
     TABLE_NAME = "KNOWLEDGE_DB"
@@ -68,24 +76,41 @@ def update_database(files_out_path_list: list):
 
                 n_results = len(results)
                 if n_results > 0:
+                    UPDATE = 0
                     write_log(formatted_datetime, f"[update database] The n_results is {n_results} and larger than 0.")
-                    row = results[0]
-                    write_log(formatted_datetime, f"[update database] Query result: {row}")
-                    e = percent_match(row[2], out)
-                    if e > 0.7:
-                        write_log(formatted_datetime, f"[update database] Because percentant match is larger than 0.7, don't update command '{cmd}' and its output into database.")
-                        continue
+                    for j in range(n_results):                    
+                        row = results[j]
+                        write_log(formatted_datetime, f"[update database] Query result {j}-th: {row}")
+                        e = percent_match(row[2], out)
+                        if e > 0.75:
+                            # there is a output in the database that matched output wanting to update to database.
+                            write_log(formatted_datetime, f"[update database] The percentant match between a output wanting to update to the database and a output {j}-th currently living in the database is larger than 0.75 ({e} > {0.75}).")
+                            break
+                        else:
+                            UPDATE += 1
+                            write_log(formatted_datetime, f"[update database] The percentant match between a output wanting to update to the database and a output {j}-th currently living in the database is smaller than 0.75 ({e} < {0.75}).")
+                    
+                    if UPDATE == n_results:
+                        # if all current output in the database is not matched.
+                        update(
+                            conn=conn,
+                            cursor=cursor,
+                            TABLE_NAME=TABLE_NAME,
+                            cmd=cmd,
+                            out=out
+                        )
                     else:
-                        write_log(formatted_datetime, f"[update database] Because percentant match is smaller than 0.7, update command '{cmd}' and its output into database.")
-                else:
-                    write_log(formatted_datetime, f"[update database] n_results is {n_results} and smaller than 0. Update a new command - output.")
+                        write_log(formatted_datetime, f"[update database] Because UPDATE is smaller than n_result ({UPDATE} < {n_results}). So don't update output to database")
 
-                id = sha256((cmd + out).encode()).hexdigest()
-                insert_query = f"INSERT INTO {TABLE_NAME} (id, command, output ) VALUES (?, ?, ?)"
-                data = (id, cmd, out)
-                cursor.execute(insert_query, data)
-                conn.commit()
-                write_log(formatted_datetime, f"[update database] Update command {cmd} and output {out} into database.")
+                else:
+                    write_log(formatted_datetime, f"[update database] n_results is {n_results}. Update a new command - output.")
+                    update(
+                        conn=conn,
+                        cursor=cursor,
+                        TABLE_NAME=TABLE_NAME,
+                        cmd=cmd,
+                        out=out
+                    )
 
             except Exception as e:
                 write_log(formatted_datetime, f"[update database] Error: {e}.")
