@@ -1,5 +1,6 @@
 import numpy as np
 from learner.RL_instance import ReinforcementAlgorithm
+from learner.RL_central import ReinforcementLearningCentral
 from learner.RL_log import write_log
 import pickle
 from learner.RL_database import CommandKnowledgeBase
@@ -8,7 +9,10 @@ db = CommandKnowledgeBase()
 
 
 class LearningEnvironment:
-    def __init__(self, rlalg: ReinforcementAlgorithm, learning: bool = True, explore_states = []) -> None:
+    def __init__(self, 
+                 rlalg: ReinforcementAlgorithm, 
+                 learning: bool = True, 
+                 explore_states = []):
         self.rlalg = rlalg  # agent
         self.LEARNING = learning
         self.previous_output = None
@@ -19,6 +23,9 @@ class LearningEnvironment:
         def produce_next_state(command: str):
             state = str({"previous_output": self.previous_output, "current_input": command})
             return state
+        
+        # increse 1 when new command comming.
+        self.rlalg.rl_central.inc()
 
         # 2, 3 kiểm tra command có trong database không.
         if db.is_command_in_db(command):

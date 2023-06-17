@@ -1,8 +1,10 @@
 import socket
 import os
 import json
+from copy import deepcopy
 from learner.environment import LearningEnvironment
 from learner.RL_instance import ReinforcementAlgorithm
+from learner.RL_central import ReinforcementLearningCentral
 from learner.RL_log import write_log
 
 
@@ -25,6 +27,10 @@ def start_server():
     
     write_log("[terminal] Start stupidPot.")
 
+    rl_central = ReinforcementLearningCentral(
+        mode = "train"
+    )
+
     # Create a socket object
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -43,15 +49,18 @@ def start_server():
             client_socket, client_address = server_socket.accept()
             print("Accepted connection from {}:{}".format(*client_address))
 
+            rl_central.inc()
+
             # Initialize RL algorithm
             alg = ReinforcementAlgorithm(
                 alg='Q-Learning',
-                q_table=load_json("learner/var/rl/q-table/")
+                q_table=load_json("learner/var/rl/q-table/"),
+                rl_central=rl_central
             )
 
             # Initialize RL environment
             env = LearningEnvironment(
-                rlalg=alg, 
+                rlalg=alg,
                 learning=True,
                 explore_states=load_json("learner/var/rl/explore_states/")
             )
@@ -80,7 +89,9 @@ def start_server():
             except (ConnectionResetError, BrokenPipeError):
                 print("Client disconnected unexpectedly.")
                 env.connection_close()
-
+            
+            # update new rl_central
+            rl_central = deepcopy(env.rlalg.rl_central)
             # Close the connection
             client_socket.close()
 

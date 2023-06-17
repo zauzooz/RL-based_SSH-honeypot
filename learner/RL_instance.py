@@ -1,28 +1,31 @@
 import numpy as np
+from copy import deepcopy
 import random
 import pickle
 from learner.RL_log import write_log
-
+from learner.RL_central import ReinforcementLearningCentral
 
 class ReinforcementAlgorithm:
     def __init__(
         self,
+        rl_central: ReinforcementLearningCentral,
         alg="Q-Learning",
-        learning_rate: float = 0.1,
-        discount: float = 1,
-        epsilon: float = 0.4,
-        explorarion: bool = True,
         q_table: dict = {},
-        command_dict: dict = {},
+        command_dict: dict = {}
     ):
         self.alg = (
             alg  # tên thuật toán algorithm, ví dụ Q-Learning, Deep Q-Learning,...
         )
         # Tham số cho Q-Learning
-        self.learning_rate: float = learning_rate
-        self.discount: float = discount
-        self.epsilon: float = epsilon
+        self.rl_central = deepcopy(rl_central)
+        self.learning_rate: float = self.rl_central.learning_rate
+        self.discount: float =  self.rl_central.discount
+        self.epsilon: float = self.rl_central.epsilon
         self.q_table: dict = q_table  # q_table là một dictionary với cặp key-value là state-aciton (action là một danh sách các giá trị q_value)
+        self.exploration = self.rl_central.exploration
+    
+        self.epsilon_factor = self.rl_central.epsilon_factor #
+        self.max_cmds = 0
 
         self.previous_state: str = None
         self.previous_action: int = None
@@ -87,13 +90,21 @@ class ReinforcementAlgorithm:
 
         # áp dụng chiến lược greedy-epsilon ở đây
         e = np.random.uniform(0, 1)
+
+        if self.max_cmds == self.rl_central.epsilon_update_stage:
+            self.rl_central.epsilon *= self.epsilon_factor
+            self.epsilon = self.rl_central.epsilon
+            self.max_cmds = 0
+        else:
+            self.max_cmds += 1
+
         if e < self.epsilon:
             # chọn một action ngẫu nhiên
-            action = int(np.random.randint(0, len(self.q_table[self.current_state])))
+            action = int(np.random.randint(len(self.q_table[self.current_state])))
             write_log(f"[reinforcement learning, produce_output] Since {e} is smaller than {self.epsilon}, the action will be taken randomly. The selected action is action {action}.")
         else:
             # chọn action có q_value cao nhất
-            action = int(np.max(self.q_table[self.current_state]))
+            action = int(np.argmax(self.q_table[self.current_state]))
             write_log(f"[reinforcement learning, produce_output] Becase {e} is larger than {self.epsilon}, the action having maximum q-value will be taken. The selected action is action {action}.")
 
         # lấy reware tương ứng với state và action.
