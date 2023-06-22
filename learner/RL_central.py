@@ -9,7 +9,7 @@ class ReinforcementLearningCentral:
                  learning: bool = True,
                  learning_rate: float = 0.095,
                  discount: float = 0.799,
-                 epsilon: float = 0.1,
+                 epsilon: float = 0.3,
                  exploration: bool = True,
                  epsilon_factor:float = 0.945,
                  epsilon_update_stage: int = 5

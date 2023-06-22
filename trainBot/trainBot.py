@@ -148,6 +148,4 @@ def start_server():
 
 if __name__ == '__main__':
     # Read input for the first command
-    N = 30
-    for i in range(N):
-        start_server()
+    start_server()

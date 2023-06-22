@@ -7,7 +7,7 @@ from learner.RL_database import CommandKnowledgeBase
 
 db = CommandKnowledgeBase()
 
-
+# LearningEnvironment will inherit Session.
 class LearningEnvironment:
     def __init__(self, 
                  rlalg: ReinforcementAlgorithm, 
@@ -17,6 +17,7 @@ class LearningEnvironment:
         self.LEARNING = learning
         self.previous_output = None
         self.explore_states = [] if type(explore_states)is dict else explore_states
+        self.UNKNOWN_SESSION = False
         self.unknown_commands = []
 
     def command_receive(self, command):
@@ -42,13 +43,17 @@ class LearningEnvironment:
                 write_log(f"[environment] The next_state will be {next_state}.")
                 if next_state not in self.explore_states:
                     self.explore_states.append(next_state)
+                    self.UNKNOWN_SESSION = True
 
                 # nếu state mới không nằm trong q_table của thuật toán
                 if next_state not in self.rlalg.q_table:
                     # hiện tại đang thực hiện trong trường hợp có 1 output,
                     # với trưởng hợp có nhiều output cần lấy toàn bột danh sách output có thể có của command.
                     self.rlalg.q_table[next_state] = np.zeros(len(output)).tolist()
+                    self.UNKNOWN_SESSION = True
+                
                 if len(self.rlalg.q_table[next_state]) < len(output):
+                    self.UNKNOWN_SESSION = True
                     while len(self.rlalg.q_table[next_state]) < len(output):
                         self.rlalg.q_table[next_state].append(0.0)
 
@@ -69,6 +74,7 @@ class LearningEnvironment:
             write_log(f"[environment] {command} is not in the database.")
             # 4.1 Không có output của commandd trong db.
             self.unknown_commands.append(command)
+            self.UNKNOWN_SESSION = True
             return "Command not found.\n"
 
     def connection_close(self):
@@ -77,15 +83,15 @@ class LearningEnvironment:
 
         now = datetime.datetime.now()
         formatted_date = now.strftime("%d-%m-%Y_%H-%M-%S-%f")
-
-        # lưu state lại để tiện load sau này.
-
-        # lưu danh sách unknown_commands dùng trong việc update sau này.
-        if self.unknown_commands != []:
-            pickle.dump(
-                self.unknown_commands,
-                open(f"learner/var/explorer/unknown_commands_{formatted_date}.log", "wb"),
-            )
+        
+        if self.UNKNOWN_SESSION:
+            # lưu danh sách unknown_commands dùng trong việc update sau này.
+            if self.unknown_commands != []:
+                pickle.dump(
+                    self.unknown_commands,
+                    open(f"learner/var/explorer/unknown_commands_{formatted_date}.log", "wb"),
+                )
+        
         # save q-table for future use.
         json.dump(
             self.rlalg.q_table,

@@ -17,6 +17,9 @@ def start_server():
             # Append the file names to the list
             for file in files:
                 file_names.append(os.path.join(root, file))
+        
+        file_names = sorted(file_names)
+
         if file_names:
             last_file_path = file_names[-1]
             dir_path = os.path.dirname(last_file_path)
@@ -51,14 +54,14 @@ def start_server():
 
             rl_central.inc()
 
-            # Initialize RL algorithm
+            # Initialize RL algorithm for session.
             alg = ReinforcementAlgorithm(
                 alg='Q-Learning',
                 q_table=load_json("learner/var/rl/q-table/"),
                 rl_central=rl_central
             )
 
-            # Initialize RL environment
+            # Initialize RL environment for session.
             env = LearningEnvironment(
                 rlalg=alg,
                 learning=True,
@@ -73,6 +76,7 @@ def start_server():
                     # Check if exit command received
                     if command == "exit":
                         output = env.command_receive(command)
+                        print("exit recieve.")
                         env.connection_close()
                         write_log("[terminal] End session.")
                         break

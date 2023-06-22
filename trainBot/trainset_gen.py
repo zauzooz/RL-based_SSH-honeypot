@@ -11,7 +11,7 @@ COMMANDS = [
     "./test_malware.exe"
 ]
 
-SEED=42
+SEED=2124
 
 
 # JUNKS = [
@@ -29,10 +29,16 @@ def trainset_generator(n_samples: int):
     def command_list_generator():
         command_list = []
 
-        n_commands = random.randint(1, 10)
+        n_commands = random.randint(3, 10)
         command_list += random.choices(COMMANDS, k=n_commands)
+        command_list_new = []
+        for cmd in command_list:
+            if cmd == COMMANDS[0] and cmd in command_list_new:
+                continue
+            else:
+                command_list_new.append(cmd)
 
-        return command_list
+        return command_list_new
 
     if n_samples <= 0:
         raise "n_samples must be larger than 0."
@@ -86,4 +92,4 @@ def trainset_generator(n_samples: int):
         container.remove()
 
 if __name__ == "__main__":
-    trainset_generator(20)
+    trainset_generator(19)
