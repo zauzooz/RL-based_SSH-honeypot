@@ -1,4 +1,4 @@
-for i in {1..500}
+for i in {1..1000}
 do
     echo Training phase [$i]
     python3 trainBot/trainBot.py

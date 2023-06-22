@@ -51,6 +51,7 @@ def start_server():
             print("Waiting for a connection...")
             client_socket, client_address = server_socket.accept()
             print("Accepted connection from {}:{}".format(*client_address))
+            print(f"Epsilon: {rl_central.epsilon}")
 
             rl_central.inc()
 
@@ -76,7 +77,7 @@ def start_server():
                     # Check if exit command received
                     if command == "exit":
                         output = env.command_receive(command)
-                        print("exit recieve.")
+                        print("")
                         env.connection_close()
                         write_log("[terminal] End session.")
                         break

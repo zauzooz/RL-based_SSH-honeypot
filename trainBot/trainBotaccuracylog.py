@@ -14,6 +14,7 @@ def accuracy_log(formatted_datetime: str, predict: dict):
         "n_true_predicts" : n_true_predictions,
         "accuracy" : float(n_true_predictions / n_sample)
     }
+    print(f"n_true_predict: {n_true_predictions}/{n_sample}")
 
     json.dump(
         data,

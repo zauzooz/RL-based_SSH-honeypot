@@ -8,10 +8,10 @@ class ReinforcementLearningCentral:
                  mode: str,
                  learning: bool = True,
                  learning_rate: float = 0.095,
-                 discount: float = 0.799,
-                 epsilon: float = 0.3,
+                 discount: float = 0.95,
+                 epsilon: float = 0.4,
                  exploration: bool = True,
-                 epsilon_factor:float = 0.945,
+                 epsilon_factor:float = 0.9995,
                  epsilon_update_stage: int = 5
                 ):
         
